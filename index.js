@@ -27,7 +27,9 @@ app.get('/', async (req, res) => {
         }
         res.json(fileData);
     } catch(err){
-        res.status(404).json({message: 'Error Data Not Found'})
+        // 404- indicates server unable to find the resource on server.
+        // 403 - indicates unable to authorize the user.
+        res.status(404).json({message: 'Error Data Not Found'}); 
     }
     
 })
