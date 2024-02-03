@@ -39,6 +39,42 @@ app.get('/', async (req, res) => {
     
 });
 
+app.get('/contact/searchByName/:name', async (req, res) => {
+    try {
+        const fileData = await readFileData();
+        const searchString = req.params.name;
+
+        const isContactFound = fileData.find(contact => contact.firstName === searchString || contact.lastName === searchString)
+
+        if(!isContactFound) {
+            return res.status(404).json({message:'contact not found'});
+        }
+
+        return res.json({data: isContactFound});
+
+    } catch(err) {
+        return res.status(500).json({message: 'Internal Server Error'});
+    }
+});
+
+app.get('/contact/searchByPhoneNumber/:name', async (req, res) => {
+    try {
+        const fileData = await readFileData();
+        const searchString = req.params.name;
+
+        const isContactFound = fileData.find(contact => contact.phoneNumber === searchString)
+
+        if(!isContactFound) {
+            return res.status(404).json({message:'contact not found'});
+        }
+
+        return res.json({data: isContactFound});
+
+    } catch(err) {
+        return res.status(500).json({message: 'Internal Server Error'});
+    }
+});
+
 app.post('/contact/add', async (req, res) => {
     try {
         const contactsData = await readFileData();
