@@ -23,6 +23,15 @@ async function readFileData() {
     }
 }
 
+async function saveContacts(filePath, contactsObj) {
+    try {
+        await fs.writeFile(filePath, JSON.stringify(contactsObj), 'utf-8');
+
+    } catch(err){
+        return [];
+    }
+}
+
 app.get('/', async (req, res) => {
     try {
         const fileData = await readFileData();
@@ -90,8 +99,35 @@ app.post('/contact/add', async (req, res) => {
         // contact doesn't exists add it to the contact.json file.
         contactsData.push({firstName, lastName, phoneNumber});
 
-        fs.writeFile(filePath, JSON.stringify(contactsData), 'utf-8');
+        // fs.writeFile(filePath, JSON.stringify(contactsData), 'utf-8');
+        saveContacts(filePath, contactsData);
         res.status(200).json({message: 'Added data successfully.'})
+
+    } catch(err){
+        return res.status(500).json({message: 'Internal Server Error'});
+    }
+});
+
+app.delete('/contact/delete/:str', async(req, res) => {
+    try {
+        const fileData = await readFileData();
+        const searchString = req.params.str;
+
+        // search for the string in the data and get the index.
+        const idx = fileData.findIndex(contact => contact.firstName === searchString || contact.phoneNumber === searchString);
+
+        if(idx == -1) {
+            return res.status(404).json({ status: 'error', message: 'Contact not found' });
+        }
+  
+        // remove the contact
+        const deletedContact = fileData.splice(idx, 1);
+
+        // fs.writeFile(filePath, JSON.stringify(fileData), 'utf-8');
+        // res.status(200).json({message: 'Added data successfully.'})
+        saveContacts(filePath, fileData);
+
+        return res.status(200).json({message: `contact deleted successfully, ${deletedContact}`});
 
     } catch(err){
         return res.status(500).json({message: 'Internal Server Error'});
