@@ -39,13 +39,23 @@ app.get('/', async (req, res) => {
     
 });
 
-app.post('/addContact', async (req, res) => {
-    console.log('newcontact: ',  req.url);
-
+app.post('/contact/add', async (req, res) => {
     try {
-        const fileData = await readFileData();
-        const newContact = req.body;
-        console.log('newcontact: ', newContact, req.body);
+        const contactsData = await readFileData();
+        const {firstName, lastName, phoneNumber} = req.body; // postbody data passed
+        
+        // check if the contact already exists.
+        const isContactExists = contactsData.find(contact => contact.firstName === firstName && contact.lastName === lastName || contact.phoneNumber === phoneNumber );
+
+        if(isContactExists) {
+            return res.status(400).json({ status: 'error', message: 'Contact already exists' });
+        }
+
+        // contact doesn't exists add it to the contact.json file.
+        contactsData.push({firstName, lastName, phoneNumber});
+
+        fs.writeFile(filePath, JSON.stringify(contactsData), 'utf-8');
+        res.status(200).json({message: 'Added data successfully.'})
 
     } catch(err){
         return res.status(500).json({message: 'Internal Server Error'});
